@@ -7,7 +7,7 @@ var MongoClient = mongodb.MongoClient;
 var url = process.env.MONGOLAB_URI;
 
 MongoClient.connect(url, function (err, db) {
-  assert.equal(null, err);
+  assert.equal(err, null);
   console.log("Connected correctly to server.");
   db.close();
 });
@@ -35,7 +35,7 @@ function isUrlValid (domain, scheme) {
   var randomHash = chance.hash({ length: 6 });
   if (domain.substr(0, 4) === 'www.' && wwwDots.length === 1 && domain.substr(4, 1) !== '.') {
     MongoClient.connect(url, function(err, db) {
-        assert.equal(null, err);
+        assert.equal(err, null);
         insertDocument(db, function() {
         db.close();
       }, domain, scheme, randomHash);
@@ -43,7 +43,7 @@ function isUrlValid (domain, scheme) {
     return { "original_url": scheme + domain, "short_url": "localhost:5000/" + randomHash };
   } else if (domain.substr(0, 4) !== 'www.' && dots.length === 1 && domain.substr(0, 1) !== '.') {
     MongoClient.connect(url, function(err, db) {
-        assert.equal(null, err);
+        assert.equal(err, null);
         insertDocument(db, function() {
         db.close();
       }, domain, scheme, randomHash);
@@ -54,12 +54,20 @@ function isUrlValid (domain, scheme) {
   }
 }
 
-app.get('/https://' + ':domain', function (req, res) {
-  res.send(isUrlValid(req.params.domain, 'https://'));
-});
-
-app.get('/http://' + ':domain', function (req, res) {
-  res.send(isUrlValid(req.params.domain, "http://"));
+app.get('/https?://' + ':domain', function (req, res) {
+  var scheme = req.originalUrl(1, 4) === 'http' ? 'http://' : 'https://';
+  MongoClient.connect(url, function (err, db) {
+    assert.equal(err, null);
+    db.collection('urls').findOne({ "url.old": req.originalUrl(1) }, function (err, doc) {
+      assert.equal(err, null);
+      if (doc) {
+        console.log(doc.url);
+      } else {
+        res.send(isUrlValid(req.params.domain, scheme));
+      }
+      db.close();
+    });
+  });
 });
 
 app.listen(5000, function () {
