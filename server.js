@@ -20,7 +20,7 @@ var insertDocument = function (db, domain, scheme, randomHash) {
    db.collection('urls').insertOne({
       "url" : {
          "original" : scheme + domain,
-         "short" : "localhost:5000/" + randomHash
+         "short" : "https://url-ms.herokuapp.com/" + randomHash
       }
    });
 };
@@ -34,13 +34,13 @@ function isUrlValid (domain, scheme) {
       assert.equal(err, null);
       insertDocument(db, domain, scheme, randomHash);
     });
-    return { "original_url": scheme + domain, "short_url": "localhost:5000/" + randomHash };
+    return { "original_url": scheme + domain, "short_url": "https://url-ms.herokuapp.com/" + randomHash };
   } else if (domain.substr(0, 4) !== 'www.' && dots.length === 1 && domain.substr(0, 1) !== '.') {
     MongoClient.connect(url, function (err, db) {
       assert.equal(err, null);
       insertDocument(db, domain, scheme, randomHash);
     });
-    return { "original_url": scheme + domain, "short_url": "localhost:5000/" + randomHash };
+    return { "original_url": scheme + domain, "short_url": "https://url-ms.herokuapp.com/" + randomHash };
   } else {
     return { "error": "not a valid url" };
   }
@@ -54,7 +54,7 @@ app.get('/https?://' + ':domain', function (req, res) {
 app.get('/:hash', function (req, res) {
   MongoClient.connect(url, function (err, db) {
     assert.equal(err, null);
-    db.collection('urls').findOne({ "url.short": "localhost:5000/" + req.params.hash }, function (err, doc) {
+    db.collection('urls').findOne({ "url.short": "https://url-ms.herokuapp.com/" + req.params.hash }, function (err, doc) {
       assert.equal(err, null);
       if (doc) {
         res.redirect(doc.url.original);
