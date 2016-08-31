@@ -6,6 +6,8 @@ var chance = require('chance').Chance();
 var MongoClient = mongodb.MongoClient;
 var url = process.env.MONGOLAB_URI;
 
+app.set('port', (process.env.PORT || 5000));
+
 MongoClient.connect(url, function (err, db) {
   assert.equal(err, null);
   console.log("Connected correctly to server.");
@@ -66,6 +68,6 @@ app.get('/:hash', function (req, res) {
   });
 });
 
-app.listen(5000, function () {
-  console.log('App listening on port ' + 5000);
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
 });
