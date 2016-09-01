@@ -68,10 +68,10 @@ app.get('/:hash', function (req, res) {
   });
 });
 
-app.get('*', function(req, res){
+app.get('*', function (req, res){
   res.send({ "error": "not a valid url" });
 });
 
-app.listen(app.get('port'), function() {
+app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'));
 });
